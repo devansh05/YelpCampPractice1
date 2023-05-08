@@ -1,5 +1,5 @@
-//Video - 407
-//imports & initializers
+//Video - 408
+//list of all camps
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -33,18 +33,10 @@ app.get("/", (req, res) => {
   res.render("home");
 });
 
-app.get("/makecampground", async (req, res) => {
-  // const camp = new Campground({
-  //   title: "Triund",
-  //   price: "700",
-  //   location: "Mclodgeganj",
-  //   description: "beginners trek, very easy",
-  // });
-  // await camp.save().then(() => {
-  //   //Closing db connection vvimp
-  //   mongoose.connection.close()
-  // });
-  // res.send(camp);
+app.get("/campgrounds", async(req, res) => {
+  const allCampgrounds = await Campground.find({});
+  console.log('LOG allCampgrounds ',allCampgrounds)
+  res.render('campgrounds/index', {allCampgrounds})
 });
 
 //Setting up local server
