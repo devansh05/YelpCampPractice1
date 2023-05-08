@@ -1,5 +1,5 @@
-//Video - 408
-//list of all camps
+//Video - 409
+//showing a single camp
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -36,6 +36,13 @@ app.get("/", (req, res) => {
 app.get("/campgrounds", async(req, res) => {
   const allCampgrounds = await Campground.find({});
   res.render('campgrounds/index', {allCampgrounds})
+});
+
+app.get("/campgrounds/:id", async(req, res) => {
+  const campground = await Campground.findById(req.params.id);
+  console.log('LOG 2 req.params.id ',campground)
+
+  res.render('campgrounds/show', {campground})
 });
 
 //Setting up local server
