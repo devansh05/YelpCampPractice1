@@ -1,5 +1,5 @@
-//Video - 409
-//showing a single camp
+//Video - 410
+//adding a new campground
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -28,6 +28,8 @@ db.once("open", () => {
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+app.use(express.urlencoded({extended: true}));
+
 //Paths
 app.get("/", (req, res) => {
   res.render("home");
@@ -38,12 +40,20 @@ app.get("/campgrounds", async(req, res) => {
   res.render('campgrounds/index', {allCampgrounds})
 });
 
+app.get("/campgrounds/new", (req, res) => {
+  res.render('campgrounds/create');
+})
+
 app.get("/campgrounds/:id", async(req, res) => {
   const campground = await Campground.findById(req.params.id);
-  console.log('LOG 2 req.params.id ',campground)
-
   res.render('campgrounds/show', {campground})
 });
+
+app.post("/campgrounds", async (req, res) => {
+  const campground = new Campground(req.body.campground);
+  await campground.save();
+  res.redirect(`/campgrounds/${campground._id}`);
+})
 
 //Setting up local server
 app.listen(3000, () => {
