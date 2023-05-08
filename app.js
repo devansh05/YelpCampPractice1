@@ -1,5 +1,5 @@
-//Video - 411
-//editing a campground
+//Video - 412
+//deleting a campground
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -65,9 +65,14 @@ app.get("/campgrounds/edit/:id", async(req, res) => {
 
 app.patch("/campgrounds/edit/:id", async (req, res) => {
   const {id} = req.params;
-  console.log('LOG ...req.body.campground  ',req.body.campground)
   const updatedCampground = await Campground.findByIdAndUpdate(id, {...req.body.campground});
   res.redirect(`/campgrounds/${updatedCampground._id}`,);
+})
+
+app.delete("/campgrounds/delete/:id", async(req, res) => {
+  const { id } = req.params;
+  const deletedCampground = await Campground.findByIdAndDelete(id);
+  res.redirect('/campgrounds')
 })
 
 //Setting up local server
