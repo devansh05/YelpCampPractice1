@@ -35,7 +35,6 @@ app.get("/", (req, res) => {
 
 app.get("/campgrounds", async(req, res) => {
   const allCampgrounds = await Campground.find({});
-  console.log('LOG allCampgrounds ',allCampgrounds)
   res.render('campgrounds/index', {allCampgrounds})
 });
 
