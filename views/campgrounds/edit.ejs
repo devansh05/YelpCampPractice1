@@ -1,28 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Campground</title>
-</head>
-<body>
-
-    <form action="/campgrounds/edit/<%=campground._id%>?_method=PATCH" method="POST">
-        <div>
-            <label for="title">Title</label>
-            <!-- to group content together under obj campground name="campground[title]" -->
-            <input type="text" id="title" name="campground[title]" value="<%= campground.title %>">
-            <label for="location">Location</label>
-            <input type="text" id="location" name="campground[location]" value="<%= campground.location %>">
-            <label for="price">Price</label>
-            <input type="number" id="price" name="campground[price]" value="<%= campground.price %>">
-            <label for="description">Description</label>
-            <input type="test" id="description" name="campground[description]" value="<%= campground.description %>">
-            <button>Edit Campground</button>
-        </div>
-    </form>
-    <a href="/campgrounds/<%= campground.id %>">All Campgrounds</a>
-    
-</body>
-</html>
+<% layout("layouts/boilerplate") %>
+<form
+  action="/campgrounds/edit/<%=campground._id%>?_method=PATCH"
+  method="POST"
+>
+  <div>
+    <label for="title">Title</label>
+    <!-- to group content together under obj campground name="campground[title]" -->
+    <input
+      type="text"
+      id="title"
+      name="campground[title]"
+      value="<%= campground.title %>"
+    />
+    <label for="location">Location</label>
+    <input
+      type="text"
+      id="location"
+      name="campground[location]"
+      value="<%= campground.location %>"
+    />
+    <label for="price">Price</label>
+    <input
+      type="number"
+      id="price"
+      name="campground[price]"
+      value="<%= campground.price %>"
+    />
+    <label for="description">Description</label>
+    <input
+      type="test"
+      id="description"
+      name="campground[description]"
+      value="<%= campground.description %>"
+    />
+    <button>Edit Campground</button>
+  </div>
+</form>
+<a href="/campgrounds/<%= campground.id %>">All Campgrounds</a>
