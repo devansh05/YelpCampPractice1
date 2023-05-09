@@ -5,6 +5,7 @@ const app = express();
 const path = require("path");
 const mongoose = require("mongoose");
 const methodOverride = require("method-override");
+const morgan = require('morgan');
 
 //Initiating db model
 const Campground = require("./models/campground");
@@ -32,6 +33,22 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(express.urlencoded({extended: true}));
 app.use(methodOverride('_method'));
+app.use(morgan('dev'));
+
+//Middlewares
+
+const verifyPassword = (req, res , next) => {
+  //this will run first tha the login api
+  const { password } = req.query;
+  if (password === '') {
+    next(); //next middleware or function
+  }
+  res.status(404).send('Incorrect Password');
+}
+
+app.get('/login', verifyPassword, (req, res) => {
+  res.send('Login success');
+})
 
 //Paths
 app.get("/", (req, res) => {
