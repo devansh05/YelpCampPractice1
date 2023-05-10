@@ -1,4 +1,4 @@
-//Video - 41 / 429
+//Video - 42 / 431
 //deleting a campground
 const express = require("express");
 const app = express();
@@ -67,8 +67,8 @@ app.get("/campgrounds/new", (req, res) => {
 })
 
 app.get("/campgrounds/:id", async(req, res) => {
-  const campground = await Campground.findById(req.params.id);
-  res.render('campgrounds/show', {campground})
+    const campground = await Campground.findById(req.params.id);
+    res.render('campgrounds/show', {campground})
 });
 
 app.post("/campgrounds", async (req, res) => {
@@ -78,8 +78,12 @@ app.post("/campgrounds", async (req, res) => {
 });
 
 app.get("/campgrounds/edit/:id", async(req, res) => {
-  const campground = await Campground.findById(req.params.id);
-  res.render('campgrounds/edit', {campground})
+  if(req.params.id){
+    const campground = await Campground.findById(req.params.id);
+    res.render('campgrounds/edit', {campground})
+  } else {
+    throw new Error('Unable to find post ID');
+  }
 });
 
 app.patch("/campgrounds/edit/:id", async (req, res) => {
