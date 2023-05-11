@@ -64,6 +64,13 @@ app.get("/", (req, res) => {
   res.render("home");
 });
 
+//Wrappers
+const wrapAsync = (fn) => {
+  return function(req, res, next){
+    fn(req, res, next).catch(e => next(e))
+  }
+}
+
 app.get("/campgrounds", async(req, res, next) => {
   const allCampgrounds = await Campground.find({});
   if(!allCampgrounds){
@@ -79,27 +86,20 @@ app.get("/campgrounds/new", (req, res) => {
   res.render('campgrounds/create');
 })
 
-app.get("/campgrounds/:id", async(req, res, next) => {
-  try{
+app.get("/campgrounds/:id", wrapAsync(async(req, res, next) => {
     const campground = await Campground.findById(req.params.id);
     res.render('campgrounds/show', {campground})
-  } catch (err){
-    next(err);
-  }
-});
+  
+}));
 
-app.post("/campgrounds", async (req, res, next) => {
-  try{
+app.post("/campgrounds", wrapAsync(async (req, res, next) => {
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
-  } catch(e){
-    next(e)
-  }
-});
+  
+}));
 
-app.get("/campgrounds/edit/:id", async(req, res, next) => {
-  try{
+app.get("/campgrounds/edit/:id", wrapAsync(async(req, res, next) => {
     if(req.params.id){
       const campground = await Campground.findById(req.params.id);
       res.render('campgrounds/edit', {campground})
@@ -107,31 +107,19 @@ app.get("/campgrounds/edit/:id", async(req, res, next) => {
       // throw new Error('Unable to find post ID');
       return next(new Error('Unable to find post ID'));
     }
-  } catch(err){
-    next(err)
-  }
-});
+}));
 
-app.patch("/campgrounds/edit/:id", async (req, res, next) => {
-  try{
+app.patch("/campgrounds/edit/:id", wrapAsync(async (req, res, next) => {
     const {id} = req.params;
     const updatedCampground = await Campground.findByIdAndUpdate(id, {...req.body.campground});
     res.redirect(`/campgrounds/${updatedCampground._id}`,);
-  } catch(err){
-    next(err)
-  }
-})
+}))
 
-app.delete("/campgrounds/delete/:id", async(req, res, next) => {
-  try{
+app.delete("/campgrounds/delete/:id", wrapAsync(async(req, res, next) => {
     const { id } = req.params;
     const deletedCampground = await Campground.findByIdAndDelete(id);
     res.redirect('/campgrounds')
-  } catch(err){
-    next(err)
-  }
-})
-
+}))
 
 app.get("/errorTest1", async(req, res) => {
   throw new AppError('failed request', 401);
