@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const methodOverride = require("method-override");
 const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
+const AppError = require('./AppError/AppError');
 
 //Initiating db model
 const Campground = require("./models/campground");
@@ -98,11 +99,28 @@ app.delete("/campgrounds/delete/:id", async(req, res) => {
   res.redirect('/campgrounds')
 })
 
+
+app.get("/errorTest1", async(req, res) => {
+  throw new AppError(401, 'Not found custom error');
+  // intentionalError.print();
+})
+
+app.get("/errorTest2", async(req, res) => {
+  intentionalError.print();
+})
+
 //using error middleware this should be placed at the end of all requests
+// app.use((err, req, res, next) => {
+//   const { status = 500 } = err;
+//   console.log('LOG Error Middleware ',err, ' status ', status);
+//   //calling next with err as an argument
+//   next(err);
+// });
+
 app.use((err, req, res, next) => {
-  console.log('LOG Error  ',err);
-  //calling next with err as an argument
-  next(err);
+  const { status = 500, message = 'Error1' } = err;
+  // console.log('LOG Error Middleware ',err, ' status ', status);
+  res.status(status).send('ERROR!!!!!', status, ' Message ', message)
 });
 
 //Setting up local server
