@@ -98,6 +98,13 @@ app.delete("/campgrounds/delete/:id", async(req, res) => {
   res.redirect('/campgrounds')
 })
 
+//using error middleware this should be placed at the end of all requests
+app.use((err, req, res, next) => {
+  console.log('LOG Error  ',err);
+  //calling next with err as an argument
+  next(err);
+});
+
 //Setting up local server
 app.listen(3000, () => {
   console.log("Serving on 3000");
