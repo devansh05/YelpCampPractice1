@@ -38,7 +38,13 @@ app.use(express.urlencoded({extended: true}));
 app.use(methodOverride('_method'));
 app.use(morgan('dev'));
 
-//Middlewares
+//Custom Middlewares
+
+app.use((req, res, next) => {
+  req.requestTime = Date.now();
+  console.log('Custom Middleware ',req.method, req.path);
+  next();
+})
 
 const verifyPassword = (req, res , next) => {
   //this will run first tha the login api
@@ -101,12 +107,12 @@ app.delete("/campgrounds/delete/:id", async(req, res) => {
 
 
 app.get("/errorTest1", async(req, res) => {
-  throw new AppError(401, 'Not found custom error');
+  throw new AppError('password required', 401);
   // intentionalError.print();
 })
 
-app.get("/errorTest2", async(req, res) => {
-  intentionalError.print();
+app.get('/error', (req, res) => {
+  chicken.fly()
 })
 
 //using error middleware this should be placed at the end of all requests
@@ -117,11 +123,19 @@ app.get("/errorTest2", async(req, res) => {
 //   next(err);
 // });
 
+app.get('/admin', (req, res) => {
+  throw new AppError('You are not an Admin!', 403)
+})
+
+app.use((req, res) => {
+  res.status(404).send('NOT FOUND!')
+})
+
 app.use((err, req, res, next) => {
-  const { status = 500, message = 'Error1' } = err;
-  // console.log('LOG Error Middleware ',err, ' status ', status);
-  res.status(status).send('ERROR!!!!!', status, ' Message ', message)
-});
+  const { status = 500, message = 'Something Went Wrong' } = err;
+  console.log('LOG message sent ',)
+  res.status(status).send(message)
+})
 
 //Setting up local server
 app.listen(3000, () => {
