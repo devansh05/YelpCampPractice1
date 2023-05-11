@@ -64,8 +64,14 @@ app.get("/", (req, res) => {
   res.render("home");
 });
 
-app.get("/campgrounds", async(req, res) => {
-  const allCampgrounds = await Campground.find({});
+app.get("/campgrounds", async(req, res, next) => {
+  // const allCampgrounds = await Campground.find({});
+  const allCampgrounds = [];
+  if(allCampgrounds){
+    //we need to pass it through next and add return or else otherwise the ejs will also render
+    // as next doesnot stop execution of further statements
+    return next(new AppError('Unable to find campgrounds!', 403))
+  }
   res.render('campgrounds/index', {allCampgrounds})
 });
 
