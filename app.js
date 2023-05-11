@@ -65,55 +65,76 @@ app.get("/", (req, res) => {
 });
 
 app.get("/campgrounds", async(req, res, next) => {
-  // const allCampgrounds = await Campground.find({});
-  const allCampgrounds = [];
-  if(allCampgrounds){
+  const allCampgrounds = await Campground.find({});
+  if(!allCampgrounds){
     //we need to pass it through next and add return or else otherwise the ejs will also render
     // as next doesnot stop execution of further statements
     return next(new AppError('Unable to find campgrounds!', 403))
+  } else {
+    res.render('campgrounds/index', {allCampgrounds})
   }
-  res.render('campgrounds/index', {allCampgrounds})
 });
 
 app.get("/campgrounds/new", (req, res) => {
   res.render('campgrounds/create');
 })
 
-app.get("/campgrounds/:id", async(req, res) => {
+app.get("/campgrounds/:id", async(req, res, next) => {
+  try{
     const campground = await Campground.findById(req.params.id);
     res.render('campgrounds/show', {campground})
-});
-
-app.post("/campgrounds", async (req, res) => {
-  const campground = new Campground(req.body.campground);
-  await campground.save();
-  res.redirect(`/campgrounds/${campground._id}`);
-});
-
-app.get("/campgrounds/edit/:id", async(req, res) => {
-  if(req.params.id){
-    const campground = await Campground.findById(req.params.id);
-    res.render('campgrounds/edit', {campground})
-  } else {
-    throw new Error('Unable to find post ID');
+  } catch (err){
+    next(err);
   }
 });
 
-app.patch("/campgrounds/edit/:id", async (req, res) => {
-  const {id} = req.params;
-  const updatedCampground = await Campground.findByIdAndUpdate(id, {...req.body.campground});
-  res.redirect(`/campgrounds/${updatedCampground._id}`,);
+app.post("/campgrounds", async (req, res, next) => {
+  try{
+    const campground = new Campground(req.body.campground);
+    await campground.save();
+    res.redirect(`/campgrounds/${campground._id}`);
+  } catch(e){
+    next(e)
+  }
+});
+
+app.get("/campgrounds/edit/:id", async(req, res, next) => {
+  try{
+    if(req.params.id){
+      const campground = await Campground.findById(req.params.id);
+      res.render('campgrounds/edit', {campground})
+    } else {
+      // throw new Error('Unable to find post ID');
+      return next(new Error('Unable to find post ID'));
+    }
+  } catch(err){
+    next(err)
+  }
+});
+
+app.patch("/campgrounds/edit/:id", async (req, res, next) => {
+  try{
+    const {id} = req.params;
+    const updatedCampground = await Campground.findByIdAndUpdate(id, {...req.body.campground});
+    res.redirect(`/campgrounds/${updatedCampground._id}`,);
+  } catch(err){
+    next(err)
+  }
 })
 
-app.delete("/campgrounds/delete/:id", async(req, res) => {
-  const { id } = req.params;
-  const deletedCampground = await Campground.findByIdAndDelete(id);
-  res.redirect('/campgrounds')
+app.delete("/campgrounds/delete/:id", async(req, res, next) => {
+  try{
+    const { id } = req.params;
+    const deletedCampground = await Campground.findByIdAndDelete(id);
+    res.redirect('/campgrounds')
+  } catch(err){
+    next(err)
+  }
 })
 
 
 app.get("/errorTest1", async(req, res) => {
-  throw new AppError('password required', 401);
+  throw new AppError('failed request', 401);
   // intentionalError.print();
 })
 
