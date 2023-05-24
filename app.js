@@ -1,4 +1,4 @@
-//Video - 43 / 443 Error Template
+//Video - 43 / 444 JOI Schema Validations
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -9,6 +9,7 @@ const ejsMate = require("ejs-mate");
 const AppError = require("./utils/ExpressError");
 const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError");
+const Joi = require('joi');
 
 //Initiating db model
 const Campground = require("./models/campground");
@@ -95,6 +96,23 @@ app.post(
   "/campgrounds",
   catchAsync(async (req, res, next) => {
     if(!req.body.campground) throw new ExpressError('Inavlid Campground Data', 400);
+    const campgroundSchema = Joi.object({
+      campground: Joi.object({
+        title: Joi.string().required(),
+        price: Joi.number().required().min(0),
+        image: Joi.string().required(),
+        location: Joi.string().required(),
+        description: Joi.string().required(),
+      }).required()
+    })
+
+    const { error } = campgroundSchema.validate(req.body);
+    
+    if(error){
+      const msg = error.details.map(el => el.message).join(',');
+      throw new ExpressError(msg, 400);
+    }
+
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
