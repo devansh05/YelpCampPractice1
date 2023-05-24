@@ -1,4 +1,4 @@
-//Video - 43 / 439
+//Video - 43 / 441
 //deleting a campground
 const express = require("express");
 const app = express();
@@ -7,7 +7,8 @@ const mongoose = require("mongoose");
 const methodOverride = require("method-override");
 const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
-const AppError = require('./AppError/AppError');
+const AppError = require('./utils/ExpressError');
+const catchAsync = require('./utils/catchAsync')
 
 //Initiating db model
 const Campground = require("./models/campground");
@@ -64,14 +65,7 @@ app.get("/", (req, res) => {
   res.render("home");
 });
 
-//Wrappers
-const wrapAsync = (fn) => {
-  return function(req, res, next){
-    fn(req, res, next).catch(e => next(e))
-  }
-}
-
-app.get("/campgrounds", async(req, res, next) => {
+app.get("/campgrounds", catchAsync(async(req, res, next) => {
   const allCampgrounds = await Campground.find({});
   if(!allCampgrounds){
     //we need to pass it through next and add return or else otherwise the ejs will also render
@@ -80,26 +74,25 @@ app.get("/campgrounds", async(req, res, next) => {
   } else {
     res.render('campgrounds/index', {allCampgrounds})
   }
-});
+}));
 
 app.get("/campgrounds/new", (req, res) => {
   res.render('campgrounds/create');
 })
 
-app.get("/campgrounds/:id", wrapAsync(async(req, res, next) => {
+app.get("/campgrounds/:id", catchAsync(async(req, res, next) => {
     const campground = await Campground.findById(req.params.id);
     res.render('campgrounds/show', {campground})
   
 }));
 
-app.post("/campgrounds", wrapAsync(async (req, res, next) => {
+app.post("/campgrounds", catchAsync(async (req, res, next) => {
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
-  
 }));
 
-app.get("/campgrounds/edit/:id", wrapAsync(async(req, res, next) => {
+app.get("/campgrounds/edit/:id", catchAsync(async(req, res, next) => {
     if(req.params.id){
       const campground = await Campground.findById(req.params.id);
       res.render('campgrounds/edit', {campground})
@@ -109,34 +102,17 @@ app.get("/campgrounds/edit/:id", wrapAsync(async(req, res, next) => {
     }
 }));
 
-app.patch("/campgrounds/edit/:id", wrapAsync(async (req, res, next) => {
+app.patch("/campgrounds/edit/:id", catchAsync(async (req, res, next) => {
     const {id} = req.params;
     const updatedCampground = await Campground.findByIdAndUpdate(id, {...req.body.campground});
     res.redirect(`/campgrounds/${updatedCampground._id}`,);
 }))
 
-app.delete("/campgrounds/delete/:id", wrapAsync(async(req, res, next) => {
+app.delete("/campgrounds/delete/:id", catchAsync(async(req, res, next) => {
     const { id } = req.params;
     const deletedCampground = await Campground.findByIdAndDelete(id);
     res.redirect('/campgrounds')
 }))
-
-app.get("/errorTest1", async(req, res) => {
-  throw new AppError('failed request', 401);
-  // intentionalError.print();
-})
-
-app.get('/error', (req, res) => {
-  chicken.fly()
-})
-
-//using error middleware this should be placed at the end of all requests
-// app.use((err, req, res, next) => {
-//   const { status = 500 } = err;
-//   console.log('LOG Error Middleware ',err, ' status ', status);
-//   //calling next with err as an argument
-//   next(err);
-// });
 
 app.get('/admin', (req, res) => {
   throw new AppError('You are not an Admin!', 403)
@@ -147,9 +123,7 @@ app.use((req, res) => {
 })
 
 app.use((err, req, res, next) => {
-  const { status = 500, message = 'Something Went Wrong' } = err;
-  console.log('LOG message sent ',)
-  res.status(status).send(message)
+  res.send('Something went wrong!')
 })
 
 //Setting up local server
