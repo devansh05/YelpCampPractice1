@@ -9,7 +9,7 @@ const ejsMate = require("ejs-mate");
 const AppError = require("./utils/ExpressError");
 const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError");
-const Joi = require('joi');
+const { campgroundSchema } = require("./utilities/validationSchemas");
 
 //Initiating db model
 const Campground = require("./models/campground");
@@ -41,12 +41,23 @@ app.use(methodOverride("_method"));
 app.use(morgan("dev"));
 
 //Custom Middlewares
-
 app.use((req, res, next) => {
   req.requestTime = Date.now();
   console.log("Custom Middleware ", req.method, req.path);
   next();
 });
+
+// Validation Middlewares
+const validateCampgrounds = ((req, res, next) => {
+  const { error } = campgroundSchema.validate(req.body);
+  console.log('LOG  error ',error)
+  if(error){
+    const msg = error.details.map(el => el.message).join(',');
+    throw new ExpressError(msg, 400);
+  } else {
+    next()
+  }
+})
 
 const verifyPassword = (req, res, next) => {
   //this will run first tha the login api
@@ -93,26 +104,9 @@ app.get(
 );
 
 app.post(
-  "/campgrounds",
+  "/campgrounds", validateCampgrounds,
   catchAsync(async (req, res, next) => {
-    if(!req.body.campground) throw new ExpressError('Inavlid Campground Data', 400);
-    const campgroundSchema = Joi.object({
-      campground: Joi.object({
-        title: Joi.string().required(),
-        price: Joi.number().required().min(0),
-        image: Joi.string().required(),
-        location: Joi.string().required(),
-        description: Joi.string().required(),
-      }).required()
-    })
-
-    const { error } = campgroundSchema.validate(req.body);
-    
-    if(error){
-      const msg = error.details.map(el => el.message).join(',');
-      throw new ExpressError(msg, 400);
-    }
-
+    // if(!req.body.campground) throw new ExpressError('Inavlid Campground Data', 400);
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
@@ -133,7 +127,7 @@ app.get(
 );
 
 app.patch(
-  "/campgrounds/edit/:id",
+  "/campgrounds/edit/:id", validateCampgrounds,
   catchAsync(async (req, res, next) => {
     const { id } = req.params;
     const updatedCampground = await Campground.findByIdAndUpdate(id, {
