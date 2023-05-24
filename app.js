@@ -1,4 +1,4 @@
-//Video - 43 / 441
+//Video - 43 / 442
 //deleting a campground
 const express = require("express");
 const app = express();
@@ -118,9 +118,6 @@ app.get('/admin', (req, res) => {
   throw new AppError('You are not an Admin!', 403)
 })
 
-app.use((req, res) => {
-  res.status(404).send('NOT FOUND!')
-})
 
 app.use((err, req, res, next) => {
   res.send('Something went wrong!')
