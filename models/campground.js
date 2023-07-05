@@ -22,6 +22,13 @@ const CampgroundSchema = new Schema({
         type : String,
         required : false
     },
+    //adding reviews to campground
+    reviews: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Review'
+        }
+    ]
     
 });
 

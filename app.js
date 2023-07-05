@@ -1,4 +1,4 @@
-//Video - 43 / 445 Validations with middleware
+//Video - 46 / 462 463 Reviews for campgrounds
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -48,16 +48,16 @@ app.use((req, res, next) => {
 });
 
 // Validation Middlewares
-const validateCampgrounds = ((req, res, next) => {
+const validateCampgrounds = (req, res, next) => {
   const { error } = campgroundSchema.validate(req.body);
-  console.log('LOG  error ',error)
-  if(error){
-    const msg = error.details.map(el => el.message).join(',');
+  console.log("LOG  error ", error);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
     throw new ExpressError(msg, 400);
   } else {
-    next()
+    next();
   }
-})
+};
 
 const verifyPassword = (req, res, next) => {
   //this will run first tha the login api
@@ -104,7 +104,8 @@ app.get(
 );
 
 app.post(
-  "/campgrounds", validateCampgrounds,
+  "/campgrounds",
+  validateCampgrounds,
   catchAsync(async (req, res, next) => {
     // if(!req.body.campground) throw new ExpressError('Inavlid Campground Data', 400);
     const campground = new Campground(req.body.campground);
@@ -127,7 +128,8 @@ app.get(
 );
 
 app.patch(
-  "/campgrounds/edit/:id", validateCampgrounds,
+  "/campgrounds/edit/:id",
+  validateCampgrounds,
   catchAsync(async (req, res, next) => {
     const { id } = req.params;
     const updatedCampground = await Campground.findByIdAndUpdate(id, {
@@ -156,9 +158,9 @@ app.all("*", (req, res, next) => {
 
 app.use((err, req, res, next) => {
   const { statusCode = 500 } = err;
-  if(!err.message) err.message = "Something went wrong!";
+  if (!err.message) err.message = "Something went wrong!";
   console.log(err);
-  res.status(statusCode).render('error', {err});
+  res.status(statusCode).render("error", { err });
 });
 
 //Setting up local server
