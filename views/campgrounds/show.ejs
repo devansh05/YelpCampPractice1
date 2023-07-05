@@ -13,15 +13,17 @@
         </h6>
         <p class="card-text"><%= campground.description %></p>
         <div class="d-flex">
-          <a class="btn btn-info " href="/campgrounds/" class="card-link"
-            >All Campgrounds</a>
+          <a class="btn btn-info" href="/campgrounds/" class="card-link"
+            >All Campgrounds</a
+          >
           <a
-            class="btn btn-info ms-3 "
+            class="btn btn-info ms-3"
             href="/campgrounds/edit/<%= campground.id %>"
             class="card-link"
-            >Edit Campground</a>
+            >Edit Campground</a
+          >
           <form
-            class="d-inline ms-3 "
+            class="d-inline ms-3"
             action="/campgrounds/delete/<%= campground.id %>?_method=DELETE"
             method="POST"
           >
@@ -30,13 +32,27 @@
         </div>
       </div>
     </div>
-    <form action="/campground/<%=campground._id%>/reviews" method="POST" class="mb-3">
+    <form
+      action="/campground/<%=campground._id%>/reviews"
+      method="POST"
+      class="mb-3 validated-form"
+      novalidate
+    >
       <div class="form-label">Leave a review:</div>
       <div class="mb-3 form-range" for="rating">Ratings</div>
-      <input type="range" name="review[rating]" min="1" max="5" id="rating">
+      <input type="range" name="review[rating]" min="1" max="5" id="rating" />
       <div class="mb-3">
         <label class="form-label" for="">Review</label>
-        <textarea class="form-control" name="review[body]" id="body" cols="30" rows="3"></textarea>
+        <textarea
+          class="form-control"
+          name="review[body]"
+          id="body"
+          cols="30"
+          rows="3"
+          required
+        ></textarea>
+        <div class="valid-feedback">Looks good!</div>
+        <div class="invalid-feedback">Please write something for a review.</div>
       </div>
       <button class="btn btn-success">Submit</button>
     </form>

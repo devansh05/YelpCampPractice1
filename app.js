@@ -9,7 +9,10 @@ const ejsMate = require("ejs-mate");
 const AppError = require("./utils/ExpressError");
 const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError");
-const { campgroundSchema } = require("./utilities/validationSchemas");
+const {
+  campgroundSchema,
+  reviewSchema,
+} = require("./utilities/validationSchemas");
 
 //Initiating db model
 const Campground = require("./models/campground");
@@ -53,6 +56,16 @@ app.use((req, res, next) => {
 const validateCampgrounds = (req, res, next) => {
   const { error } = campgroundSchema.validate(req.body);
   console.log("LOG  error ", error);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new ExpressError(msg, 400);
+  } else {
+    next();
+  }
+};
+
+const validateReviews = (req, res, next) => {
+  const { error } = reviewSchema.validate(req.body);
   if (error) {
     const msg = error.details.map((el) => el.message).join(",");
     throw new ExpressError(msg, 400);
@@ -150,15 +163,19 @@ app.delete(
   })
 );
 
-app.post('/campground/:id/reviews', catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const campGround = await Campground.findById(id);
-  const review = new Review(req.body.review);
-  campGround.reviews.push(review);
-  await campGround.save();
-  await review.save();
-  res.redirect(`/campgrounds/${campGround._id}`)
-}))
+app.post(
+  "/campground/:id/reviews",
+  validateReviews,
+  catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const campGround = await Campground.findById(id);
+    const review = new Review(req.body.review);
+    campGround.reviews.push(review);
+    await campGround.save();
+    await review.save();
+    res.redirect(`/campgrounds/${campGround._id}`);
+  })
+);
 
 app.get("/admin", (req, res) => {
   throw new AppError("You are not an Admin!", 403);
