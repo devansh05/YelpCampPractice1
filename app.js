@@ -1,4 +1,4 @@
-//Video - 46 / 465 Validations and error handling for reviews
+//Video - 46 / 466 467 Populaitng Styling Reviews
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -113,7 +113,7 @@ app.get("/campgrounds/new", (req, res) => {
 app.get(
   "/campgrounds/:id",
   catchAsync(async (req, res, next) => {
-    const campground = await Campground.findById(req.params.id);
+    const campground = await Campground.findById(req.params.id).populate('reviews');
     res.render("campgrounds/show", { campground });
   })
 );
