@@ -1,4 +1,4 @@
-//Video - 46 / 462 463 Reviews for campgrounds
+//Video - 46 / 462 463 464 Reviews for campgrounds
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -13,6 +13,8 @@ const { campgroundSchema } = require("./utilities/validationSchemas");
 
 //Initiating db model
 const Campground = require("./models/campground");
+const Review = require("./models/review");
+const campground = require("./models/campground");
 
 //Initiating db connection
 mongoose
@@ -147,6 +149,16 @@ app.delete(
     res.redirect("/campgrounds");
   })
 );
+
+app.post('/campground/:id/reviews', catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const campGround = await Campground.findById(id);
+  const review = new Review(req.body.review);
+  campGround.reviews.push(review);
+  await campGround.save();
+  await review.save();
+  res.redirect(`/campgrounds/${campGround._id}`)
+}))
 
 app.get("/admin", (req, res) => {
   throw new AppError("You are not an Admin!", 403);
