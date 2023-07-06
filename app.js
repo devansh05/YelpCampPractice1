@@ -1,4 +1,4 @@
-//Video - 46 / 466 467 Populaitng Styling Reviews
+//Video - 46 / 468 469 Deleting reviews Reviews
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -113,7 +113,9 @@ app.get("/campgrounds/new", (req, res) => {
 app.get(
   "/campgrounds/:id",
   catchAsync(async (req, res, next) => {
-    const campground = await Campground.findById(req.params.id).populate('reviews');
+    const campground = await Campground.findById(req.params.id).populate(
+      "reviews"
+    );
     res.render("campgrounds/show", { campground });
   })
 );
@@ -160,6 +162,17 @@ app.delete(
     const { id } = req.params;
     const deletedCampground = await Campground.findByIdAndDelete(id);
     res.redirect("/campgrounds");
+  })
+);
+
+app.delete(
+  "/campgrounds/:id/reviews/:reviewId",
+  catchAsync(async (req, res, next) => {
+    const { id, reviewId } = req.params;
+    //Pull operator in mongo that removes a value and all value that matches
+    await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+    await Review.findByIdAndDelete(req.params.reviewId);
+    res.redirect(`/campgrounds/${id}`)
   })
 );
 
