@@ -1,6 +1,7 @@
-//Video - 46 / 468 469 Deleting reviews Reviews
+//Video - 48/487 Express Sessions
 const express = require("express");
 const app = express();
+const session = require('express-session');
 const path = require("path");
 const mongoose = require("mongoose");
 const methodOverride = require("method-override");
@@ -47,6 +48,19 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(morgan("dev"));
 app.use(express.static(path.join(__dirname, 'public')));
+
+const sessionConfig = {
+  secret: 'yelpCampSecretKeyDev',
+  resave: false,
+  saveUninitialized: 'true',
+  cookie : {
+    httpOnly: true,
+    expires : Date.now() + (1000 * 60 * 60 * 24 * 2),
+    maxAge : 1000 * 60 * 60 * 24 * 2
+  }
+}
+
+app.use(session(sessionConfig))
 
 //Custom Middlewares
 app.use((req, res, next) => {
