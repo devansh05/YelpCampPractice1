@@ -15,9 +15,11 @@ const {
 } = require("./utilities/validationSchemas");
 
 //Initiating db model
-const Campground = require("./models/campground");
-const Review = require("./models/review");
 const campground = require("./models/campground");
+
+//Routes
+const campgrounds = require('./routes/campgorunds');
+const reviews = require('./routes/reviews');
 
 //Initiating db connection
 mongoose
@@ -44,6 +46,7 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(morgan("dev"));
+app.use(express.static(path.join(__dirname, 'public')));
 
 //Custom Middlewares
 app.use((req, res, next) => {
@@ -52,27 +55,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Validation Middlewares
-const validateCampgrounds = (req, res, next) => {
-  const { error } = campgroundSchema.validate(req.body);
-  console.log("LOG  error ", error);
-  if (error) {
-    const msg = error.details.map((el) => el.message).join(",");
-    throw new ExpressError(msg, 400);
-  } else {
-    next();
-  }
-};
-
-const validateReviews = (req, res, next) => {
-  const { error } = reviewSchema.validate(req.body);
-  if (error) {
-    const msg = error.details.map((el) => el.message).join(",");
-    throw new ExpressError(msg, 400);
-  } else {
-    next();
-  }
-};
+//Routes Middlewares
+app.use('/campgrounds', campgrounds);
+app.use('/campgrounds/:id/reviews', reviews)
 
 const verifyPassword = (req, res, next) => {
   //this will run first tha the login api
@@ -91,104 +76,6 @@ app.get("/login", verifyPassword, (req, res) => {
 app.get("/", (req, res) => {
   res.render("home");
 });
-
-app.get(
-  "/campgrounds",
-  catchAsync(async (req, res, next) => {
-    const allCampgrounds = await Campground.find({});
-    if (!allCampgrounds) {
-      //we need to pass it through next and add return or else otherwise the ejs will also render
-      // as next doesnot stop execution of further statements
-      return next(new AppError("Unable to find campgrounds!", 403));
-    } else {
-      res.render("campgrounds/index", { allCampgrounds });
-    }
-  })
-);
-
-app.get("/campgrounds/new", (req, res) => {
-  res.render("campgrounds/create");
-});
-
-app.get(
-  "/campgrounds/:id",
-  catchAsync(async (req, res, next) => {
-    const campground = await Campground.findById(req.params.id).populate(
-      "reviews"
-    );
-    res.render("campgrounds/show", { campground });
-  })
-);
-
-app.post(
-  "/campgrounds",
-  validateCampgrounds,
-  catchAsync(async (req, res, next) => {
-    // if(!req.body.campground) throw new ExpressError('Inavlid Campground Data', 400);
-    const campground = new Campground(req.body.campground);
-    await campground.save();
-    res.redirect(`/campgrounds/${campground._id}`);
-  })
-);
-
-app.get(
-  "/campgrounds/edit/:id",
-  catchAsync(async (req, res, next) => {
-    if (req.params.id) {
-      const campground = await Campground.findById(req.params.id);
-      res.render("campgrounds/edit", { campground });
-    } else {
-      // throw new Error('Unable to find post ID');
-      return next(new Error("Unable to find post ID"));
-    }
-  })
-);
-
-app.patch(
-  "/campgrounds/edit/:id",
-  validateCampgrounds,
-  catchAsync(async (req, res, next) => {
-    const { id } = req.params;
-    const updatedCampground = await Campground.findByIdAndUpdate(id, {
-      ...req.body.campground,
-    });
-    res.redirect(`/campgrounds/${updatedCampground._id}`);
-  })
-);
-
-app.delete(
-  "/campgrounds/delete/:id",
-  catchAsync(async (req, res, next) => {
-    const { id } = req.params;
-    const deletedCampground = await Campground.findByIdAndDelete(id);
-    res.redirect("/campgrounds");
-  })
-);
-
-app.delete(
-  "/campgrounds/:id/reviews/:reviewId",
-  catchAsync(async (req, res, next) => {
-    const { id, reviewId } = req.params;
-    //Pull operator in mongo that removes a value and all value that matches
-    await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
-    await Review.findByIdAndDelete(req.params.reviewId);
-    res.redirect(`/campgrounds/${id}`)
-  })
-);
-
-app.post(
-  "/campground/:id/reviews",
-  validateReviews,
-  catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const campGround = await Campground.findById(id);
-    const review = new Review(req.body.review);
-    campGround.reviews.push(review);
-    await campGround.save();
-    await review.save();
-    res.redirect(`/campgrounds/${campGround._id}`);
-  })
-);
 
 app.get("/admin", (req, res) => {
   throw new AppError("You are not an Admin!", 403);
