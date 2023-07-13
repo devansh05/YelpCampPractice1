@@ -1,12 +1,19 @@
-//Video - 48/487 Express Sessions
+//Video - 48/488 Flash
 const express = require("express");
 const app = express();
-const session = require('express-session');
-const path = require("path");
-const mongoose = require("mongoose");
-const methodOverride = require("method-override");
+const router = express.Router();
+const session = require("express-session");
 const morgan = require("morgan");
 const ejsMate = require("ejs-mate");
+const path = require("path");
+const mongoose = require("mongoose");
+const flash = require("connect-flash");
+const methodOverride = require("method-override");
+
+//Routes
+const campgrounds = require("./routes/campgrounds");
+const reviews = require("./routes/reviews");
+//Error
 const AppError = require("./utils/ExpressError");
 const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError");
@@ -17,10 +24,6 @@ const {
 
 //Initiating db model
 const campground = require("./models/campground");
-
-//Routes
-const campgrounds = require('./routes/campgorunds');
-const reviews = require('./routes/reviews');
 
 //Initiating db connection
 mongoose
@@ -34,9 +37,7 @@ mongoose
 
 //initiating db
 const db = mongoose.connection;
-db.on("error", console.log.bind(console, "db connection error:"));
 db.once("open", () => {
-  console.log("db connected");
 });
 
 //Setting up EJS
@@ -46,32 +47,39 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
+app.use(flash());
 app.use(morgan("dev"));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
 const sessionConfig = {
-  secret: 'yelpCampSecretKeyDev',
+  secret: "yelpCampSecretKeyDev",
   resave: false,
-  saveUninitialized: 'true',
-  cookie : {
+  saveUninitialized: "true",
+  cookie: {
     httpOnly: true,
-    expires : Date.now() + (1000 * 60 * 60 * 24 * 2),
-    maxAge : 1000 * 60 * 60 * 24 * 2
-  }
-}
+    expires: Date.now() + 1000 * 60 * 60 * 24 * 2,
+    maxAge: 1000 * 60 * 60 * 24 * 2,
+  },
+};
 
-app.use(session(sessionConfig))
+app.use(session(sessionConfig));
 
 //Custom Middlewares
 app.use((req, res, next) => {
   req.requestTime = Date.now();
-  console.log("Custom Middleware ", req.method, req.path);
+  next();
+});
+
+app.use((req, res, next) => {
+  console.log("LOG req.locals  ", req.flash(''));
+  res.locals.success = req.flash("success");
+  res.locals.failure = req.flash("failure");
   next();
 });
 
 //Routes Middlewares
-app.use('/campgrounds', campgrounds);
-app.use('/campgrounds/:id/reviews', reviews)
+app.use("/campgrounds", campgrounds);
+app.use("/campgrounds/:id/reviews", reviews);
 
 const verifyPassword = (req, res, next) => {
   //this will run first tha the login api
@@ -96,13 +104,13 @@ app.get("/admin", (req, res) => {
 });
 
 app.all("*", (req, res, next) => {
+  console.log('LOG Error  ',)
   next(new ExpressError("Page not found", 404));
 });
 
 app.use((err, req, res, next) => {
   const { statusCode = 500 } = err;
   if (!err.message) err.message = "Something went wrong!";
-  console.log(err);
   res.status(statusCode).render("error", { err });
 });
 

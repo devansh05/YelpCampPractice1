@@ -30,6 +30,8 @@ router.get(
       return next(new AppError("Unable to find campgrounds!", 403));
     } else {
       res.render("campgrounds/index", { allCampgrounds });
+      console.log('LOG 1 showing camps ',)
+      req.flash('success', 'Here are all the available campgrounds.')
     }
   })
 );
@@ -52,6 +54,7 @@ router.post(
   "/",
   validateCampgrounds,
   catchAsync(async (req, res, next) => {
+    req.flash('success', 'Successfully created a new campground.')
     // if(!req.body.campground) throw new ExpressError('Inavlid Campground Data', 400);
     const campground = new Campground(req.body.campground);
     await campground.save();
