@@ -6,11 +6,11 @@ const {
   campgroundSchema,
 } = require("../utilities/validationSchemas");
 const Campground = require("../models/campground");
+const { isLoggedIn } = require('../middleware');
 
 // Validation Middlewares
 const validateCampgrounds = (req, res, next) => {
   const { error } = campgroundSchema.validate(req.body);
-  console.log("LOG  error ", error);
   if (error) {
     const msg = error.details.map((el) => el.message).join(",");
     throw new ExpressError(msg, 400);
@@ -30,18 +30,18 @@ router.get(
       return next(new AppError("Unable to find campgrounds!", 403));
     } else {
       res.render("campgrounds/index", { allCampgrounds });
-      console.log('LOG 1 showing camps ',)
       req.flash('success', 'Here are all the available campgrounds.')
     }
   })
 );
 
-router.get("/new", (req, res) => {
+router.get("/new", isLoggedIn, (req, res) => {
   res.render("campgrounds/create");
 });
 
 router.get(
   "/:id",
+  isLoggedIn,
   catchAsync(async (req, res, next) => {
     const campground = await Campground.findById(req.params.id).populate(
       "reviews"
@@ -64,6 +64,7 @@ router.post(
 
 router.get(
   "/edit/:id",
+  isLoggedIn,
   catchAsync(async (req, res, next) => {
     if (req.params.id) {
       const campground = await Campground.findById(req.params.id);

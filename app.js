@@ -1,4 +1,4 @@
-//Video - 51/505 Passport
+//Video - 51/504, 505 Passport Authentication
 const express = require("express");
 const app = express();
 const router = express.Router();
@@ -9,10 +9,17 @@ const path = require("path");
 const mongoose = require("mongoose");
 const flash = require("connect-flash");
 const methodOverride = require("method-override");
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
+
+//Model for passport
+const User = require('./models/user');
 
 //Routes
-const campgrounds = require("./routes/campgrounds");
-const reviews = require("./routes/reviews");
+const usersRoutes = require("./routes/users");
+const campgroundRoutes = require("./routes/campgrounds");
+const reviewRoutes = require("./routes/reviews");
+
 //Error
 const AppError = require("./utils/ExpressError");
 const catchAsync = require("./utils/catchAsync");
@@ -45,12 +52,7 @@ app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride("_method"));
-app.use(flash());
-app.use(morgan("dev"));
-app.use(express.static(path.join(__dirname, "public")));
-
+//MiddleWares
 const sessionConfig = {
   secret: "yelpCampSecretKeyDev",
   resave: false,
@@ -63,6 +65,18 @@ const sessionConfig = {
 };
 
 app.use(session(sessionConfig));
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
+app.use(flash());
+app.use(morgan("dev"));
+app.use(express.static(path.join(__dirname, "public")));
+app.use(passport.initialize());
+app.use(passport.session());
+//add user from local strategy and call method authenticate there already added from plugin
+passport.use(new LocalStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 //Custom Middlewares
 app.use((req, res, next) => {
@@ -71,15 +85,16 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  console.log("LOG req.locals  ", req.flash(''));
+  res.locals.currentUser = req.user;
   res.locals.success = req.flash("success");
   res.locals.failure = req.flash("failure");
   next();
 });
 
 //Routes Middlewares
-app.use("/campgrounds", campgrounds);
-app.use("/campgrounds/:id/reviews", reviews);
+app.use("/", usersRoutes);
+app.use("/campgrounds", campgroundRoutes);
+app.use("/campgrounds/:id/reviews", reviewRoutes);
 
 const verifyPassword = (req, res, next) => {
   //this will run first tha the login api
@@ -104,7 +119,6 @@ app.get("/admin", (req, res) => {
 });
 
 app.all("*", (req, res, next) => {
-  console.log('LOG Error  ',)
   next(new ExpressError("Page not found", 404));
 });
 
