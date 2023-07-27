@@ -23,6 +23,10 @@ const CampgroundSchema = new Schema({
         type : String,
         required : false
     },
+    author: {
+        type: Schema.Types.ObjectId,
+        ref: 'User', 
+    },
     //adding reviews to campground
     reviews: [
         {

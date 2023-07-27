@@ -35,16 +35,17 @@ router.get(
   })
 );
 
-router.get("/new", isLoggedIn, (req, res) => {
+router.get("/new", (req, res) => {
   res.render("campgrounds/create");
 });
 
 router.get(
   "/:id",
-  isLoggedIn,
   catchAsync(async (req, res, next) => {
     const campground = await Campground.findById(req.params.id).populate(
       "reviews"
+    ).populate(
+      "author"
     );
     res.render("campgrounds/show", { campground });
   })
@@ -57,6 +58,7 @@ router.post(
     req.flash('success', 'Successfully created a new campground.')
     // if(!req.body.campground) throw new ExpressError('Inavlid Campground Data', 400);
     const campground = new Campground(req.body.campground);
+    campground.author = req.user._id;
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
   })
@@ -64,7 +66,6 @@ router.post(
 
 router.get(
   "/edit/:id",
-  isLoggedIn,
   catchAsync(async (req, res, next) => {
     if (req.params.id) {
       const campground = await Campground.findById(req.params.id);
