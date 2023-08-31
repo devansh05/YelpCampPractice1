@@ -10,12 +10,10 @@ const mongoose = require("mongoose");
 const flash = require("connect-flash");
 const methodOverride = require("method-override");
 const passport = require('passport');
-require('./config/passportConfig')(passport);
-
-// const LocalStrategy = require('passport-local').Strategy;
+const LocalStrategy = require('passport-local').Strategy;
 
 //Model for passport
-// const User = require('./models/user');
+const User = require('./models/user');
 
 //Error
 const AppError = require("./utils/ExpressError");
@@ -46,21 +44,21 @@ const sessionConfig = {
   },
 };
 
-app.use(session(sessionConfig));
 app.use(express.urlencoded({ extended: true }));
+app.use(session(sessionConfig));
 app.use(methodOverride("_method"));
 app.use(morgan("dev"));
 app.use(express.static(path.join(__dirname, "public")));
 //Passport Init
-// User.createStrategy();
+User.createStrategy();
 app.use(passport.initialize());
 app.use(flash());
 app.use(passport.session());
 //add user from local strategy and call method authenticate there already added from plugin
-// passport.use(new LocalStrategy(User.authenticate()));
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
-// passport.serializeUser(User.serializeUser());
-// passport.deserializeUser(User.deserializeUser());
 
 //Routes
 const userRoutes = require("./routes/users");
@@ -69,7 +67,7 @@ const reviewRoutes = require("./routes/reviews");
 
 //Initiating db connection
 mongoose
-  .connect("mongodb://127.0.0.1:27017/yelp-camp", { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect("mongodb://127.0.0.1:27017/yelp-camp")
   .then(() => {
     console.log("Mongo Connected!");
   })
