@@ -1,6 +1,6 @@
 const express = require('express');
-const User = require('../models/user');
 const router = express.Router();
+const User = require('../models/user');
 const passport = require('passport');
 
 router.get('/register', (req, res) => {
@@ -29,13 +29,21 @@ router.get('/login', (req, res) => {
     res.render('users/login')
 });
 
-router.post('/login', passport.authenticate('local', { failureFlash: true, failureRedirect: '/login' }), (req, res) => {
-    req.flash('success', 'welcome back');
-    console.log('LOG  req.session ',req.session)
+// router.post('/login', passport.authenticate('local', { failureFlash: true, failureRedirect: '/login' }), (req, res) => {
+//     req.flash('success', 'welcome back');
+//     const redirectUrl = req.session.returnTo || '/campgrounds';
+//     delete req.session.returnTo;
+//     res.redirect(redirectUrl);
+// });
+
+router.post('/login',
+  passport.authenticate('local', { failureRedirect: '/login', failureMessage: true }),
+  function(req, res) {
+    console.log('LOG LOGIN req.isAuthenticated()  ',req.isAuthenticated());
+    console.log('LOG Test ',req.session);
     const redirectUrl = req.session.returnTo || '/campgrounds';
-    delete req.session.returnTo;
     res.redirect(redirectUrl);
-});
+  });
 
 router.get('/logout', (req, res) => {
     req.logout(function (err) {

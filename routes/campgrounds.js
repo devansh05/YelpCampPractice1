@@ -22,6 +22,7 @@ const validateCampgrounds = (req, res, next) => {
 //Routes
 router.get(
   "/",
+  isLoggedIn,
   catchAsync(async (req, res, next) => {
     const allCampgrounds = await Campground.find({});
     if (!allCampgrounds) {
@@ -35,7 +36,7 @@ router.get(
   })
 );
 
-router.get("/new", (req, res) => {
+router.get("/new", isLoggedIn, (req, res) => {
   res.render("campgrounds/create");
 });
 
@@ -66,6 +67,7 @@ router.post(
 
 router.get(
   "/edit/:id",
+  isLoggedIn,
   catchAsync(async (req, res, next) => {
     if (req.params.id) {
       const campground = await Campground.findById(req.params.id);
@@ -79,6 +81,7 @@ router.get(
 
 router.patch(
   "/edit/:id",
+  isLoggedIn,
   validateCampgrounds,
   catchAsync(async (req, res, next) => {
     const { id } = req.params;
@@ -91,6 +94,7 @@ router.patch(
 
 router.delete(
   "/delete/:id",
+  isLoggedIn,
   catchAsync(async (req, res, next) => {
     const { id } = req.params;
     const deletedCampground = await Campground.findByIdAndDelete(id);
