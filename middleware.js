@@ -1,8 +1,7 @@
 module.exports.isLoggedIn = (req, res, next) => {
-    console.log('LOG MIDDLEWARE req.isAuthenticated()  ',req.isAuthenticated())
-    if(!req.isAuthenticated()){
-        req.session.cookie.path = req._parsedOriginalUrl.path;
-        req.flash('failure', 'You must be signed in.');
+    if(!req.session.user_id){
+        req.session.destroy();
+        console.log('LOG ERROR. YOU ARE NOT LOGGED IN. PLEASE LOGIN AGAIN.')
         return res.redirect('/login');
     }
     next();

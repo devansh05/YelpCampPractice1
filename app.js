@@ -1,4 +1,4 @@
-//Video - 51/504, 505 Passport Authentication
+//Video - 50/503 Removed passport authentication, went back to old school authentication
 const express = require("express");
 const app = express();
 const router = express.Router();
@@ -9,8 +9,6 @@ const path = require("path");
 const mongoose = require("mongoose");
 const flash = require("connect-flash");
 const methodOverride = require("method-override");
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
 
 //Model for passport
 const User = require('./models/user');
@@ -50,15 +48,7 @@ app.use(methodOverride("_method"));
 app.use(morgan("dev"));
 app.use(express.static(path.join(__dirname, "public")));
 //Passport Init
-User.createStrategy();
-app.use(passport.initialize());
 app.use(flash());
-app.use(passport.session());
-//add user from local strategy and call method authenticate there already added from plugin
-passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
-
 
 //Routes
 const userRoutes = require("./routes/users");
@@ -88,7 +78,7 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  res.locals.currentUser = req.user;
+  res.locals.user_id = req.session.user_id;
   res.locals.success = req.flash("success");
   res.locals.failure = req.flash("failure");
   next();
