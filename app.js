@@ -1,4 +1,4 @@
-//Video - 50/503 Removed passport authentication, went back to old school authentication
+//Video - 52/516 Authenticating reviews edit and delete
 const express = require("express");
 const app = express();
 const router = express.Router();
@@ -72,13 +72,12 @@ db.once("open", () => {
 
 
 //Custom Middlewares
-app.use((req, res, next) => {
-  req.requestTime = Date.now();
-  next();
-});
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   res.locals.user_id = req.session.user_id;
+  const currentUser = await User.findById(req.session.user_id);
+  console.log('LOG  currentUser ',currentUser)
+  res.locals.currentUser = currentUser;
   res.locals.success = req.flash("success");
   res.locals.failure = req.flash("failure");
   next();

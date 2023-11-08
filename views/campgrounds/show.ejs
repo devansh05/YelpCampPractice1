@@ -15,24 +15,26 @@
           <%= campground.price %>
         </h6>
         <p class="card-text"><%= campground.description %></p>
-        <div class="d-flex">
-          <a class="btn btn-info" href="/campgrounds/" class="card-link"
-            >All Campgrounds</a
-          >
-          <a
-            class="btn btn-info ms-3"
-            href="/campgrounds/edit/<%= campground.id %>"
-            class="card-link"
-            >Edit Campground</a
-          >
-          <form
-            class="d-inline ms-3"
-            action="/campgrounds/delete/<%= campground.id %>?_method=DELETE"
-            method="POST"
-          >
-            <button class="btn btn-danger">Delete Campground</button>
-          </form>
-        </div>
+        <% if(campground.author._id.equals(currentUser._id)){ %>
+          <div class="d-flex">
+            <a class="btn btn-info" href="/campgrounds/" class="card-link"
+              >All Campgrounds</a
+            >
+            <a
+              class="btn btn-info ms-3"
+              href="/campgrounds/edit/<%= campground.id %>"
+              class="card-link"
+              >Edit Campground</a
+            >
+            <form
+              class="d-inline ms-3"
+              action="/campgrounds/delete/<%= campground.id %>?_method=DELETE"
+              method="POST"
+            >
+              <button class="btn btn-danger">Delete Campground</button>
+            </form>
+          </div>
+        <% } %>
       </div>
     </div>
     <div class="col-6 ms-3">
@@ -69,9 +71,11 @@
         <div class="card-body">
           <p class="card-title fw-normal">Rating : <%= review.rating%></p>
           <p class="card-text fw-light">Review : <%= review.body%></p>
+          <% if(campground.author._id.equals(currentUser._id)) { %>
           <form action="/campgrounds/<%=campground._id%>/reviews/<%=review._id%>?_method=DELETE" method="POST">
-            <button class="btn btn-sm btn-danger">Delete</button>
+            <button class="btn btn-sm btn-danger">Delete Review</button>
           </form>
+          <% } %>
         </div>
       </div>
       <% } %>

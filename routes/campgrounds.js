@@ -42,6 +42,7 @@ router.get("/new", isLoggedIn, (req, res) => {
 
 router.get(
   "/:id",
+  isLoggedIn,
   catchAsync(async (req, res, next) => {
     const campground = await Campground.findById(req.params.id).populate(
       "reviews"
@@ -54,6 +55,7 @@ router.get(
 
 router.post(
   "/",
+  isLoggedIn,
   validateCampgrounds,
   catchAsync(async (req, res, next) => {
     req.flash('success', 'Successfully created a new campground.')
