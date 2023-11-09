@@ -76,7 +76,6 @@ db.once("open", () => {
 app.use(async (req, res, next) => {
   res.locals.user_id = req.session.user_id;
   const currentUser = await User.findById(req.session.user_id);
-  console.log('LOG  currentUser ',currentUser)
   res.locals.currentUser = currentUser;
   res.locals.success = req.flash("success");
   res.locals.failure = req.flash("failure");

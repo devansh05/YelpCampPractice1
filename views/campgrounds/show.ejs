@@ -65,6 +65,7 @@
         </div>
         <button class="btn btn-success">Submit</button>
       </form>
+      <% if(currentUser){ %>
       <div class="mt-1">Reviews:</div>
       <% for(let review of campground.reviews) {%>
       <div class="mb-3 card">
@@ -78,6 +79,7 @@
           <% } %>
         </div>
       </div>
+      <% } %>
       <% } %>
     </div>
   </div>
