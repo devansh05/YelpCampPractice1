@@ -1,5 +1,7 @@
 const ExpressError = require('./utils/ExpressError');
 const Campground = require('./models/campground');
+const Review = require('./models/review');
+
 const {
     campgroundSchema, reviewSchema
   } = require("./utilities/validationSchemas");
@@ -43,3 +45,14 @@ module.exports.validateReviews = (req, res, next) => {
       next();
     }
   };
+
+  module.exports.isReviewAuthor = async (req, res, next) => {
+    const { id, reviewId } = req.params;
+    const review = await Review.findById(reviewId);
+    
+    if(!review.author._id.equals(req.session.user_id)){
+      console.log('LOG You dont have permission to do this.',)
+      return res.redirect(`/campgrounds/${id}`)
+    }
+    next();
+}

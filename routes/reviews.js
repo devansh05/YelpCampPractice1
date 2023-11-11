@@ -2,12 +2,13 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const catchAsync = require("../utils/catchAsync");
 const ExpressError = require("../utils/ExpressError");
-const { validateReviews, isLoggedIn } = require("../middleware");
+const { validateReviews, isLoggedIn, isReviewAuthor } = require("../middleware");
 const Campground = require("../models/campground");
 const Review = require("../models/review");
 
 router.delete(
   "/:reviewId",
+  isReviewAuthor,
   catchAsync(async (req, res, next) => {
     const { id, reviewId } = req.params;
     //Pull operator in mongo that removes a value and all value that matches
