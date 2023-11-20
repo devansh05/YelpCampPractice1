@@ -2,7 +2,7 @@
 <div class="row">
   <h1 class="text-center">New Campgrounds</h1>
   <div class="col-6 offset-3">
-    <form action="/campgrounds" method="POST" novalidate class="validated-form">
+    <form action="/campgrounds" method="POST" novalidate class="validated-form" enctype="multipart/form-data">
       <div>
         <!-- to group content together under obj campground name="campground[title]" -->
         <div class="">
@@ -62,13 +62,14 @@
           <input
             class="form-control mb-2"
             type="test"
-            id="image"
-            name="campground[image]"
+            id="image1"
+            name="campground[image1]"
             required
           />
           <div class="valid-feedback">Looks good!</div>
           <div class="invalid-feedback">Please choose an image.</div>
         </div>
+        <input type="file" name="image" id="" multiple/>
 
         <div class="d-flex justify-content-between">
           <button class="btn btn-success mb-2">Add Campground</button>

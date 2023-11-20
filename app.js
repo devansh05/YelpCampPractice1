@@ -1,4 +1,9 @@
-//53/523 Restructuring and creatinf controllers
+//54/529 Uploading multiple files using Cloudinary & Multer
+
+if(process.env.NODE_ENV != 'production'){
+  require('dotenv').config();
+}
+
 const express = require("express");
 const app = express();
 const router = express.Router();
