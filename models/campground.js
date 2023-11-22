@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const Review = require("./review")
+const Review = require("./review");
+const { required } = require("joi");
 const Schema = mongoose.Schema;
 
 const CampgroundSchema = new Schema({
@@ -11,10 +12,12 @@ const CampgroundSchema = new Schema({
         type : Number,
         required : false
     },
-    image: {
-        type: String,
-        required: false
-    },
+    images: [
+        {
+            url: String,
+            filename: String,
+        }
+    ],
     description: {
         type : String,
         required : false

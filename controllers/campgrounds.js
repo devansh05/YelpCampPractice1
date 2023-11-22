@@ -21,6 +21,7 @@ module.exports.index = async (req, res, next) => {
     // if(!req.body.campground) throw new ExpressError('Inavlid Campground Data', 400);
     const campground = new Campground(req.body.campground);
     campground.author = req.session.user_id;
+    campground.images = req.files.map(f => ({url: f.path, filename: f.filename}));
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
   }
@@ -52,6 +53,9 @@ module.exports.index = async (req, res, next) => {
     const updatedCampground = await Campground.findByIdAndUpdate(id, {
       ...req.body.campground,
     });
+    const imagesArr = req.files.map(f => ({url: f.path, filename: f.filename}));
+    updatedCampground.images.push(...imagesArr);
+    await updatedCampground.save()
     res.redirect(`/campgrounds/${updatedCampground._id}`);
   }
 

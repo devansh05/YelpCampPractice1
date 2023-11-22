@@ -1,4 +1,4 @@
-//54/529 Uploading multiple files using Cloudinary & Multer
+//54/534 Editing and showing images
 
 if(process.env.NODE_ENV != 'production'){
   require('dotenv').config();

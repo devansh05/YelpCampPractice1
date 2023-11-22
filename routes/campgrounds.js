@@ -1,6 +1,7 @@
 const express = require("express");
 const multer = require("multer");
-const upload = multer({dest: 'uploads/'})
+const { storage, cloudinary } = require("../cloudinary/index");
+const upload = multer({ storage });
 const router = express.Router();
 const catchAsync = require("../utils/catchAsync");
 const ExpressError = require("../utils/ExpressError");
@@ -22,21 +23,18 @@ router.get("/new", isLoggedIn, campgrounds.renderNewForm);
 
 router.get("/:id", isLoggedIn, catchAsync(campgrounds.showCampgrounds));
 
-// router.post(
-//   "/",
-//   isLoggedIn,
-//   validateCampgrounds,
-//   catchAsync(campgrounds.createCampground)
-// );
-
 router.post(
   "/",
-  upload.array('image'),
-  (req, res) => {
-    console.log('LOG 1 ',req.body, " FILES ",req.files)
-    res.send();
-  }
+  isLoggedIn,
+  upload.array("image"),
+  validateCampgrounds,
+  catchAsync(campgrounds.createCampground)
 );
+
+// router.post("/", upload.array("image"), (req, res) => {
+//   console.log("LOG 1 ", req.body, " FILES ", req.files);
+//   res.send();
+// });
 
 router.get(
   "/edit/:id",
@@ -49,6 +47,7 @@ router.patch(
   "/edit/:id",
   isLoggedIn,
   isPermitted,
+  upload.array("image"),
   validateCampgrounds,
   catchAsync(campgrounds.editCampground)
 );

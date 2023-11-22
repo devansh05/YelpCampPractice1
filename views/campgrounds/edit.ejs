@@ -7,6 +7,7 @@
       method="POST"
       novalidate
       class="validated-form"
+      enctype="multipart/form-data"
     >
       <div>
         <!-- to group content together under obj campground name="campground[title]" -->
@@ -69,14 +70,14 @@
         </div>
 
         <div>
-          <label class="form-label" for="image">Image Url</label>
+          <label class="form-label" for="image">Add Images</label>
           <input
             class="form-control mb-2"
-            type="text"
+            type="file"
             id="image"
-            name="campground[image]"
+            name="image"
             value="<%= campground.image %>"
-            required
+            multiple
           />
           <div class="valid-feedback">Looks good!</div>
           <div class="invalid-feedback">Please choose an image.</div>
