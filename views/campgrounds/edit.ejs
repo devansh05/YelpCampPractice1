@@ -68,9 +68,18 @@
           <div class="valid-feedback">Looks good!</div>
           <div class="invalid-feedback">Please write a description.</div>
         </div>
-
+        
         <div>
-          <label class="form-label" for="image">Add Images</label>
+          <label class="form-label mt-4" for="image">Edit Images</label>
+          <div class="my-3">
+            <% campground.images.forEach((img, i) => { %>
+              <img src= <%= img.thumbnail %> class='img-thumbnail rounded'/>
+              <div class="form-check-inline">
+                <input class="" id="image-<%=i%>" type="checkbox"name="deleteImages[]" value="<%=img.filename%>"/>
+              </div>
+              <label role="button" for="image-<%=i%>" >Delete Image ?</label>
+              <% }); %>
+          </div>
           <input
             class="form-control mb-2"
             type="file"
@@ -82,6 +91,7 @@
           <div class="valid-feedback">Looks good!</div>
           <div class="invalid-feedback">Please choose an image.</div>
         </div>
+        <label class="form-label text-danger fs-6 mb-4" for="">You can only upload 3 images.</label>
 
         <div class="d-flex justify-content-between">
           <button class="btn btn-success mb-2">Edit Campground</button>

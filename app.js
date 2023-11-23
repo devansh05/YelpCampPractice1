@@ -1,4 +1,4 @@
-//54/534 Editing and showing images
+//54/539 Editing, showing and deleting images displaying Thumbnails
 
 if(process.env.NODE_ENV != 'production'){
   require('dotenv').config();
