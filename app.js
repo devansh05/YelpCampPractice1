@@ -1,4 +1,4 @@
-//58/567 Implementing security to website for common attacks and restrictions
+//59/573 Implementing deployment config for Heroku
 
 if (process.env.NODE_ENV != "production") {
   require("dotenv").config();
@@ -16,9 +16,11 @@ const flash = require("connect-flash");
 const methodOverride = require("method-override");
 const mongoSanitize = require("express-mongo-sanitize");
 const helmet = require("helmet");
+const MongoStore = require('connect-mongo');
 
 //Model for passport
 const User = require("./models/user");
+const dbUrl = process.env.MONGO_DB_URL || "mongodb://127.0.0.1:27017/yelp-camp"
 
 //Error
 const AppError = require("./utils/ExpressError");
@@ -38,13 +40,27 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 //MiddleWares
+
+const secretKey = process.env.SECRET || 'yelpCampSecretKeyDev';
+
+const store = MongoStore.create({
+  mongoUrl: dbUrl,
+  secret: secretKey,
+  touchAfter: 24 * 60 * 60
+})
+
+store.on('error', function(e){
+  console.log('Session Store Error', e)
+})
+
 const sessionConfig = {
-  secret: "yelpCampSecretKeyDev",
-  name: "somethingUniqueNotEasilyGuessable",
+  store,
+  secret: secretKey,
+  name: "session",
   resave: false,
   saveUninitialized: "true",
   cookie: {
-    httpOnly: true,
+    // httpOnly: true,
     // httpsOnly: true, //this only works on https
     // secure: true, //this will only work on https requests
     expires: Date.now() + 1000 * 60 * 60 * 24 * 2,
@@ -123,13 +139,15 @@ const campgroundRoutes = require("./routes/campgrounds");
 const reviewRoutes = require("./routes/reviews");
 
 //Initiating db connection
+// mongodb://127.0.0.1:27017/yelp-camp
+
 mongoose
-  .connect("mongodb://127.0.0.1:27017/yelp-camp")
+  .connect(process.env.MONGO_DB_URL)
   .then(() => {
     console.log("Mongo Connected!");
   })
   .catch((error) => {
-    console.log("Mongo Connection Error ", error);
+    console.log("Mongo Connection Error", error);
   });
 
 //initiating db
@@ -184,7 +202,9 @@ app.use((err, req, res, next) => {
   res.status(statusCode).render("error", { err });
 });
 
-//Setting up local server
-app.listen(3000, () => {
-  console.log("Serving on 3000");
+//Setting up server
+const port = process.env.PORT || 3000;
+
+app.listen(port, () => {
+  console.log(`Serving on port : ${port}`);
 });
