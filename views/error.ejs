@@ -8,9 +8,11 @@
         Status Code : <%= err.statusCode %>
       </p>
       <hr />
-      <p class="mb-0">
-        <%= err.stack %>
-      </p>
+      <% if(process.env.NODE_ENV != 'production'){ %>
+        <p class="mb-0">
+          <%= err.stack %>
+        </p>
+      <% } %>
     </div>
   </div>
 </div>

@@ -1,10 +1,12 @@
 <% layout("layouts/boilerplate") %>
-<h2>
-  Login
-</h2>
-<form action="/login" method="POST"
+
+<div class="w-100 justify-content-center">
+  <h2>
+    Login
+  </h2>
+  <form action="/login" method="POST"
 novalidate
-class="validated-form">
+class="w-25 validated-form card shadow border-0 p-3">
     <div>
         <label class="form-label" for="username">Username</label>
         <input
@@ -13,6 +15,7 @@ class="validated-form">
             id="username"
             name="username"
             required
+            autofocus
           />
         <div class="valid-feedback">Looks good!</div>
         <div class="invalid-feedback">Please enter a username.</div>
@@ -29,5 +32,6 @@ class="validated-form">
         <div class="valid-feedback">Looks good!</div>
         <div class="invalid-feedback">Please enter a password.</div>
       </div>
-      <button class="btn btn-primary">Login</button>
+      <button class="btn btn-primary btn-block">Login</button>
 </form>
+</div>

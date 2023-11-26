@@ -1,7 +1,7 @@
-//54/539 Editing, showing and deleting images displaying Thumbnails
+//58/567 Implementing security to website for common attacks and restrictions
 
-if(process.env.NODE_ENV != 'production'){
-  require('dotenv').config();
+if (process.env.NODE_ENV != "production") {
+  require("dotenv").config();
 }
 
 const express = require("express");
@@ -14,9 +14,11 @@ const path = require("path");
 const mongoose = require("mongoose");
 const flash = require("connect-flash");
 const methodOverride = require("method-override");
+const mongoSanitize = require("express-mongo-sanitize");
+const helmet = require("helmet");
 
 //Model for passport
-const User = require('./models/user');
+const User = require("./models/user");
 
 //Error
 const AppError = require("./utils/ExpressError");
@@ -38,10 +40,13 @@ app.set("views", path.join(__dirname, "views"));
 //MiddleWares
 const sessionConfig = {
   secret: "yelpCampSecretKeyDev",
+  name: "somethingUniqueNotEasilyGuessable",
   resave: false,
   saveUninitialized: "true",
   cookie: {
     httpOnly: true,
+    // httpsOnly: true, //this only works on https
+    // secure: true, //this will only work on https requests
     expires: Date.now() + 1000 * 60 * 60 * 24 * 2,
     maxAge: 1000 * 60 * 60 * 24 * 2,
   },
@@ -54,6 +59,63 @@ app.use(morgan("dev"));
 app.use(express.static(path.join(__dirname, "public")));
 //Passport Init
 app.use(flash());
+app.use(
+  mongoSanitize({
+    replaceWith: "_",
+  })
+);
+
+app.use(helmet());
+
+const scriptSrcUrls = [
+  "https://stackpath.bootstrapcdn.com/",
+  "https://api.tiles.mapbox.com/",
+  "https://api.mapbox.com/",
+  "https://kit.fontawesome.com/",
+  "https://cdnjs.cloudflare.com/",
+  "https://cdn.jsdelivr.net",
+];
+const styleSrcUrls = [
+  "https://kit-free.fontawesome.com/",
+  "https://stackpath.bootstrapcdn.com/",
+  "https://api.mapbox.com/",
+  "https://api.tiles.mapbox.com/",
+  "https://fonts.googleapis.com/",
+  "https://use.fontawesome.com/",
+  "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css",
+  "http://localhost:3000/public/stylesheets/home.css",
+  "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css",
+  "http://localhost:3000/public/stylesheets/home.css",
+];
+const connectSrcUrls = [
+  "https://api.mapbox.com/",
+  "https://a.tiles.mapbox.com/",
+  "https://b.tiles.mapbox.com/",
+  "https://events.mapbox.com/",
+  "https://source.unsplash.com/collection/",
+];
+const fontSrcUrls = [];
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: [],
+      connectSrc: ["'self'", ...connectSrcUrls],
+      scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+      styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+      workerSrc: ["'self'", "blob:"],
+      objectSrc: [],
+      imgSrc: [
+        "'self'",
+        "blob:",
+        "data:",
+        "https://res.cloudinary.com/ded08vkk3/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT!
+        "https://images.unsplash.com/",
+        "https://source.unsplash.com/collection/",
+      ],
+      fontSrc: ["'self'", ...fontSrcUrls],
+    },
+  })
+);
 
 //Routes
 const userRoutes = require("./routes/users");
@@ -72,9 +134,7 @@ mongoose
 
 //initiating db
 const db = mongoose.connection;
-db.once("open", () => {
-});
-
+db.once("open", () => {});
 
 //Custom Middlewares
 
